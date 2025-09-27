@@ -1,0 +1,17 @@
+- name: Goblin
+  hp: 6
+  min_damage: 1
+  max_damage: 3
+  image: assets/monsters/goblin.webp
+
+- name: Orc
+  hp: 14
+  min_damage: 3
+  max_damage: 6
+  image: assets/monsters/orc.webp
+
+- name: Dragon
+  hp: 50
+  min_damage: 5
+  max_damage: 12
+  image: assets/monsters/dragon.webp

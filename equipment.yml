@@ -1,0 +1,19 @@
+- name: Iron Sword
+  type: weapon
+  attack_bonus: 10
+  defense_bonus: 0
+
+- name: Wooden Shield
+  type: armor
+  attack_bonus: 0
+  defense_bonus: 1
+
+- name: Steel Armor
+  type: armor
+  attack_bonus: 0
+  defense_bonus: 3
+
+- name: Magic Wand
+  type: weapon
+  attack_bonus: 4
+  defense_bonus: 0
