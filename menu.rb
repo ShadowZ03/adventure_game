@@ -7,15 +7,19 @@ require_relative 'battle'
 # --- Helper function ---
 def choose_monster(monsters)
     puts "Choose a monster to fight:"
-    monsters.each_with_index do |m, index|
-        puts "#{index + 1}. #{m.name} (HP: #{m.hp})"
+    monsters.each_with_index do |m, i|
+        puts "#{i + 1}. #{m.name} (HP: #{m.hp})"
     end
 
-    print "Enter the number: "
-    choice = gets.chomp.to_i
-    choice = 1 if choice < 1 || choice > monsters.size
-    monsters[choice - 1]
+    choice = nil
+    until choice && choice.between?(1, monsters.size)
+        print "> "
+        choice = gets.chomp.to_i
+    end
+
+    monsters[choice - 1]   # returns the selected monster
 end
+
 
 # --- Setup ---
 player = Player.new(name: "Hero", hp: 12)

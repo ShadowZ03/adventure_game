@@ -26,17 +26,17 @@ class Monster
     def self.load_monsters(file = "monsters.yml")
         full_path = File.join(File.dirname(__FILE__), file)
         data = YAML.load_file(full_path)
-    return [] unless data.is_a?(Array)
+        return [] unless data.is_a?(Array)
 
-    data.map do |m|
-        Monster.new(
-        name: m["name"],
-        hp: m["hp"],
-        min_damage: m["min_damage"],
-        max_damage: m["max_damage"],
-        image_path: m["image"]
-        )
+        data.map do |m|
+            Monster.new(
+            name: m["name"],
+            hp: m["hp"],
+            min_damage: m["min_damage"],
+            max_damage: m["max_damage"],
+            image_path: m["image"]
+            )
+        end
     end
-end
 
 end
