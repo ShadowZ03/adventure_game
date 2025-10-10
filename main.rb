@@ -28,6 +28,10 @@ monsters = Monster.load_monsters
 game_state = :menu
 battle     = nil
 selected_monster = nil
+set width: 800, height: 600
+set resizable: true
+
+
 
 # Menu graphics
 title_text  = Text.new("Ruby D&D Adventure", x: 200, y: 100, size: 40, color: 'yellow')
