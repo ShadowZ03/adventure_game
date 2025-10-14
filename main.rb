@@ -1,100 +1,40 @@
 require 'ruby2d'
-require_relative 'player'
-require_relative 'monster'
-require_relative 'equipment'
-require_relative 'battle'
+require_relative '../lib/player'
+require_relative '../lib/monster'
+require_relative '../lib/battle'
 
-# --- Helper function ---
-def choose_monster(monsters)
-    puts "Choose a monster to fight:"
-    monsters.each_with_index do |m, i|
-        puts "#{i + 1}. #{m.name} (HP: #{m.hp})"
+class GameWindow
+    def initialize(player, monsters)
+        @player = player
+        @monsters = monsters
+        @monster_image = nil
     end
 
-    choice = nil
-    until choice && choice.between?(1, monsters.size)
+    def start
+        set title: "Adventure!", width: 800, height: 600, resizable: true
+        show_menu
+        show
+    end
+
+    def show_menu
+        puts "Choose a monster:"
+        @monsters.each_with_index do |m, i|
+        puts "#{i + 1}. #{m.name}"
+        end
         print "> "
-        choice = gets.chomp.to_i
+        choice = gets.to_i - 1
+        start_battle(@monsters[choice])
     end
 
-    monsters[choice - 1]   # returns the selected monster
-end
+    def start_battle(monster)
+        @monster_image = Image.new(monster.image_path)
+        center_image(@monster_image)
+    end
 
-# --- Setup ---
-player   = Player.new(name: "Hero", hp: 12)
-monsters = Monster.load_monsters
+    private
 
-# --- Menu state ---
-game_state = :menu
-battle     = nil
-selected_monster = nil
-set width: 800, height: 600
-set resizable: true
-
-
-
-# Menu graphics
-title_text  = Text.new("Ruby D&D Adventure", x: 200, y: 100, size: 40, color: 'yellow')
-start_text  = Text.new("Press ENTER to Start", x: 250, y: 200, size: 25, color: 'white')
-quit_text   = Text.new("Press Q to Quit", x: 270, y: 240, size: 25, color: 'white')
-
-# Placeholder for battle graphics (created later)
-monster_image = nil
-message_text  = nil
-
-# --- Input handling ---
-on :key_down do |event|
-    case game_state
-    when :menu
-        case event.key
-        when 'return'
-        # Start game
-        selected_monster = choose_monster(monsters)
-        battle = Battle.new(player, selected_monster)
-
-        # Setup graphics for battle
-        monster_image = Image.new(selected_monster.image_path, x: 400, y: 100)
-        message_text  = Text.new(battle.message, x: 50, y: 10, size: 20, color: 'green')
-
-        # Hide menu
-        title_text.remove
-        start_text.remove
-        quit_text.remove
-
-        game_state = :battle
-
-        when 'q'
-        close
-        end
-
-    when :battle
-        case event.key
-        when 'a'
-        battle.player_action(:attack)
-        when 'r'
-        battle.player_action(:run)
-        end
+    def center_image(image)
+        image.x = Window.width / 2 - image.width / 2
+        image.y = Window.height / 2 - image.height / 2
     end
 end
-
-# --- Game loop ---
-update do
-    if game_state == :battle
-        battle.update_turn
-        message_text.text = battle.message
-
-        # Monster defeated
-        if !battle.monster.alive?
-        puts "#{battle.monster.name} has been defeated!"
-
-        selected_monster = choose_monster(monsters)
-        battle = Battle.new(player, selected_monster)
-
-        # Update graphics
-        monster_image.path = selected_monster.image_path
-        message_text.text  = battle.message
-        end
-    end
-end
-
-show

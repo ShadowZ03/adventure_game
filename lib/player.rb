@@ -1,8 +1,7 @@
 class Player
     attr_accessor :name, :hp, :equipment
 
-    def initialize(name: "Hero", hp: 10)
-        @name = name
+    def initialize(name = "Hero", hp = 10)
         @hp = hp
         @equipment = []   # array of Equipment objects
 

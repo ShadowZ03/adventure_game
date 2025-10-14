@@ -24,7 +24,9 @@ class Monster
 
     # factory method to load from YAML
     def self.load_monsters(file = "monsters.yml")
-        full_path = File.join(File.dirname(__FILE__), file)
+        full_path = File.expand_path("../data/#{file}", __dir__)
+
+        puts full_path
         data = YAML.load_file(full_path)
         return [] unless data.is_a?(Array)
 
