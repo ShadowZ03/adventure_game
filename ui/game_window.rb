@@ -1,5 +1,6 @@
 require 'ruby2d'
 require_relative '../lib/battle'
+
 class GameWindow
     def initialize(player, monsters)
         @player = player
@@ -39,67 +40,41 @@ class GameWindow
         @menu_texts.each(&:remove)
         @menu_texts.clear
 
-        Text.new("Choose a monster:", x: 300, y: 100, size: 30, color: 'white')
+        title = Text.new("Choose a monster:", x: 300, y: 100, size: 30, color: 'white')
+        @menu_texts << title  # ✅ Add it to @menu_texts
 
         @monsters.each_with_index do |m, i|
-        t = Text.new("#{i + 1}. #{m.name}", x: 330, y: 150 + (i * 40), size: 25, color: 'green')
-        @menu_texts << t
+            t = Text.new("#{i + 1}. #{m.name}", x: 330, y: 150 + (i * 40), size: 25, color: 'green')
+            @menu_texts << t
         end
     end
 
-    # def handle_menu_input(event)
-    #     case event.key
-    #         when "1", "2", "3"
-    #         index = event.key.to_i - 1
-    #             if index.between?(0, @monsters.length - 1)
-    #                 start_battle(@monsters[index])
-    #         end
-    #     end
-    # end
-def handle_menu_input(event)
-    key = event.key
+    def handle_menu_input(event)
+        key = event.key
 
-    begin
-        if key =~ /^[1-9]$/ && key.to_i.between?(1, @monsters.length)
-        index = key.to_i - 1
-        monster = @monsters[index]
-        puts "[DEBUG] Monster selected: #{monster.name}"
-        start_battle(monster)
-        else
-        puts "[DEBUG] Invalid key: #{key.inspect}"
+        begin
+            if key =~ /^[1-9]$/ && key.to_i.between?(1, @monsters.length)
+            index = key.to_i - 1
+            monster = @monsters[index]
+            puts "[DEBUG] Monster selected: #{monster.name}"
+            start_battle(monster)
+            else
+            puts "[DEBUG] Invalid key: #{key.inspect}"
+            end
+        rescue => e
+            puts "⚠️ Error in handle_menu_input: #{e.class} - #{e.message}"
+            puts e.backtrace
         end
-    rescue => e
-        puts "⚠️ Error in handle_menu_input: #{e.class} - #{e.message}"
-        puts e.backtrace
     end
-end
-
-
-
-
-    # def start_battle(monster)
-    #     @state = :battle
-    #     @menu_texts.each(&:remove)
-    #     @selected_monster = monster
-
-    #     @current_battle = Battle.new(@player, monster)
-
-    #     @monster_image = Image.new(monster.image_path)
-    #     center_image(@monster_image)
-
-    #     @battle_text = Text.new("A wild #{monster.name} appears!", x: 250, y: 50, size: 30, color: 'red')
-    # end
 
     def start_battle(monster)
         @state = :battle
+        # @menu_texts&.remove
+
         @menu_texts.each(&:remove)
         @selected_monster = monster
 
         @current_battle = Battle.new(@player, monster)
-        #        yaml_file = File.join(__dir__, '..', 'data', 'monsters.yml')
-        
-        # puts "monster: #{selected_monster.name}"
-        # puts "monster image link: #{select_monster.image_path}"
         
         @monster_image = Image.new(File.join(__dir__, '..', monster.image_path))
         center_image(@monster_image)
