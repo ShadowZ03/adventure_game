@@ -1,6 +1,5 @@
 require 'ruby2d'
-require_relative 'lib/battle'
-
+require_relative '../lib/battle'
 class GameWindow
     def initialize(player, monsters)
         @player = player
@@ -18,11 +17,11 @@ class GameWindow
 
         Window.on :key_down do |event|
         case @state
-        when :menu
-            handle_menu_input(event)
-        when :battle
-            handle_battle_input(event)
-        end
+            when :menu
+                handle_menu_input(event)
+            when :battle
+                handle_battle_input(event)
+            end
         end
 
         Window.update do
@@ -57,14 +56,24 @@ class GameWindow
     #         end
     #     end
     # end
-    def handle_menu_input(event)
-        if ("1".."#{@monsters.length}").include?(event.key)
-            index = event.key.to_i - 1
-            start_battle(@monsters[index])
+def handle_menu_input(event)
+    key = event.key
+
+    begin
+        if key =~ /^[1-9]$/ && key.to_i.between?(1, @monsters.length)
+        index = key.to_i - 1
+        monster = @monsters[index]
+        puts "[DEBUG] Monster selected: #{monster.name}"
+        start_battle(monster)
         else
-            puts "[DEBUG] Invalid key: #{event.key}"
+        puts "[DEBUG] Invalid key: #{key.inspect}"
         end
+    rescue => e
+        puts "⚠️ Error in handle_menu_input: #{e.class} - #{e.message}"
+        puts e.backtrace
     end
+end
+
 
 
 
@@ -82,16 +91,23 @@ class GameWindow
     # end
 
     def start_battle(monster)
-    @state = :battle
-    @menu_texts.each(&:remove)
-    @selected_monster = monster
+        @state = :battle
+        @menu_texts.each(&:remove)
+        @selected_monster = monster
 
-    @current_battle = Battle.new(@player, monster)
+        @current_battle = Battle.new(@player, monster)
+        #        yaml_file = File.join(__dir__, '..', 'data', 'monsters.yml')
+        
+        # puts "monster: #{selected_monster.name}"
+        # puts "monster image link: #{select_monster.image_path}"
+        
+        @monster_image = Image.new(File.join(__dir__, '..', monster.image_path))
+        center_image(@monster_image)
 
-    @monster_image = Image.new(monster.image_path)
-    center_image(@monster_image)
-
-    Text.new("A wild #{monster.name} appears!", x: 250, y: 50, size: 30, color: 'red')
+        Text.new("A wild #{monster.name} appears!", x: 250, y: 50, size: 30, color: 'red')
+        rescue => e
+        puts "⚠️ Could not start battle: #{e.class} - #{e.message}"
+        puts e.backtrace
     end
 
 
