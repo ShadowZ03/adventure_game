@@ -10,10 +10,11 @@ class GameWindow
         @state = :menu
         @selected_monster = nil
         @current_battle = nil
+        @intro_texts = nil
     end
 
     def start
-        Window.set(title: "Adventure!", width: 800, height: 600)
+        Window.set(title: "Adventure!", width: 800, height: 600, resizable: true)
         show_menu
 
         Window.on :key_down do |event|
@@ -79,7 +80,7 @@ class GameWindow
         @monster_image = Image.new(File.join(__dir__, '..', monster.image_path))
         center_image(@monster_image)
 
-        Text.new("A wild #{monster.name} appears!", x: 250, y: 50, size: 30, color: 'red')
+        @intro_texts = Text.new("A wild #{monster.name} appears!", x: 250, y: 50, size: 30, color: 'red')
         rescue => e
         puts "⚠️ Could not start battle: #{e.class} - #{e.message}"
         puts e.backtrace
@@ -100,6 +101,12 @@ class GameWindow
         end
     end
 
+    def wrap_text(text, max_length = 50)
+        text.scan(/.{1,#{max_length}}(?:\s+|$)/).join("\n")
+    end
+
+
+
     def update_battle
         return unless @current_battle
 
@@ -112,10 +119,17 @@ class GameWindow
         end
     end
 
+    # def update_battle_message(message)
+    #     @battle_text.remove if @battle_text
+    #     @battle_text = Text.new(message, x: 250, y: 500, size: 25, color: 'white')
+    # end
+
     def update_battle_message(message)
         @battle_text.remove if @battle_text
-        @battle_text = Text.new(message, x: 250, y: 500, size: 25, color: 'white')
+        wrapped = wrap_text(message, 800) # adjust 60 to fit your window width
+        @battle_text = Text.new(wrapped, x: 50, y: 500, size: 25, color: 'white')
     end
+
 
     def show_victory_screen
         clear_battle
@@ -123,8 +137,25 @@ class GameWindow
     end
 
     def show_defeat_screen
+        # Text.clear
         clear_battle
-        Text.new("You were defeated...", x: 300, y: 300, size: 40, color: 'red')
+
+        @menu_texts&.each(&:remove)
+        @menu_texts&.clear
+        @battle_texts&.each(&:remove)
+        @battle_texts&.clear
+        @intro_texts&.remove
+        @intro_texts = nil
+
+        defeated_text = Text.new("You were defeated...", x: 300, y: 100, size: 40, color: 'red')
+        center_text(defeated_text)
+        game_over_image = Image.new(File.join(__dir__, '..', '/assets/other/skull.webp'))
+        center_image(game_over_image)
+
+        try_again_text = Text.new("Try again? (Y)es (N)o", x: 300, y: 500, size: 40, color: 'orange')
+        center_text(try_again_text)
+
+
     end
 
     def clear_battle
@@ -138,4 +169,10 @@ class GameWindow
         image.x = (Window.width - image.width) / 2
         image.y = (Window.height - image.height) / 2
     end
+
+    def center_text(text)
+        text.x = (Window.width - text.width) / 2
+        # image.y = (Window.height - image.height) / 2
+    end
+
 end
