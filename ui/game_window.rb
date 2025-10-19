@@ -23,6 +23,8 @@ class GameWindow
                 handle_menu_input(event)
             when :battle
                 handle_battle_input(event)
+            when :defeat
+                handle_defeat_input(event)
             end
         end
 
@@ -42,7 +44,7 @@ class GameWindow
         @menu_texts.clear
 
         title = Text.new("Choose a monster:", x: 300, y: 100, size: 30, color: 'white')
-        @menu_texts << title  # ✅ Add it to @menu_texts
+        @menu_texts << title  
 
         @monsters.each_with_index do |m, i|
             t = Text.new("#{i + 1}. #{m.name}", x: 330, y: 150 + (i * 40), size: 25, color: 'green')
@@ -67,6 +69,17 @@ class GameWindow
             puts e.backtrace
         end
     end
+
+    def handle_defeat_input(event)
+        case event.key
+        when "y"
+            clear_defeat_screen
+            reset_game
+        when "n"
+            exit
+        end
+    end
+
 
     def start_battle(monster)
         @state = :battle
@@ -105,8 +118,6 @@ class GameWindow
         text.scan(/.{1,#{max_length}}(?:\s+|$)/).join("\n")
     end
 
-
-
     def update_battle
         return unless @current_battle
 
@@ -119,44 +130,78 @@ class GameWindow
         end
     end
 
-    # def update_battle_message(message)
-    #     @battle_text.remove if @battle_text
-    #     @battle_text = Text.new(message, x: 250, y: 500, size: 25, color: 'white')
-    # end
-
     def update_battle_message(message)
         @battle_text.remove if @battle_text
         wrapped = wrap_text(message, 800) # adjust 60 to fit your window width
         @battle_text = Text.new(wrapped, x: 50, y: 500, size: 25, color: 'white')
     end
 
-
     def show_victory_screen
         clear_battle
         Text.new("You won!", x: 350, y: 300, size: 40, color: 'yellow')
     end
 
+    # def show_defeat_screen
+    #     # Text.clear
+    #     clear_battle
+
+    #     @menu_texts&.each(&:remove)
+    #     @menu_texts&.clear
+    #     @battle_texts&.each(&:remove)
+    #     @battle_texts&.clear
+    #     @intro_texts&.remove
+    #     @intro_texts = nil
+
+    #     defeated_text = Text.new("You were defeated...", x: 300, y: 100, size: 40, color: 'red')
+    #     center_text(defeated_text)
+        
+    #     game_over_image = Image.new(File.join(__dir__, '..', '/assets/other/skull.webp'))
+    #     center_image(game_over_image)
+
+    #     try_again_text = Text.new("Try again? (Y)es (N)o", x: 300, y: 500, size: 40, color: 'orange')
+    #     center_text(try_again_text)
+
+
+
+    #     Window.on :key_down do |event|
+    #         case event.key
+    #             when "y"
+    #                 clear_all()
+    #                 game_over_image = nil
+    #                 show_menu
+
+    #             when "n"
+    #                 exit
+    #             end
+    #         end
+
+    # end
+
     def show_defeat_screen
-        # Text.clear
         clear_battle
+        clear_texts
 
-        @menu_texts&.each(&:remove)
-        @menu_texts&.clear
-        @battle_texts&.each(&:remove)
-        @battle_texts&.clear
-        @intro_texts&.remove
-        @intro_texts = nil
+        @state = :defeat
+        @defeat_elements = []
 
-        defeated_text = Text.new("You were defeated...", x: 300, y: 100, size: 40, color: 'red')
+        defeated_text = Text.new("You were defeated...", x: 0, y: 100, size: 40, color: 'red')
         center_text(defeated_text)
-        game_over_image = Image.new(File.join(__dir__, '..', '/assets/other/skull.webp'))
-        center_image(game_over_image)
+        @defeat_elements << defeated_text
 
-        try_again_text = Text.new("Try again? (Y)es (N)o", x: 300, y: 500, size: 40, color: 'orange')
+        skull_path = File.join(__dir__, '..', 'assets/other/skull.webp')
+        if File.exist?(skull_path)
+            game_over_image = Image.new(skull_path)
+            center_image(game_over_image)
+            @defeat_elements << game_over_image
+        else
+            puts "⚠️ Missing image: #{skull_path}"
+        end
+
+        try_again_text = Text.new("Try again? (Y)es (N)o", x: 0, y: 500, size: 30, color: 'orange')
         center_text(try_again_text)
-
-
+        @defeat_elements << try_again_text
     end
+
 
     def clear_battle
         @monster_image&.remove
@@ -174,5 +219,24 @@ class GameWindow
         text.x = (Window.width - text.width) / 2
         # image.y = (Window.height - image.height) / 2
     end
+
+    def clear_texts
+    @menu_texts&.each(&:remove)
+    @menu_texts&.clear
+    @battle_text&.remove
+    @intro_texts&.remove
+    @intro_texts = nil
+    end
+
+    def clear_defeat_screen
+    @defeat_elements&.each(&:remove)
+    @defeat_elements&.clear
+    end
+
+    def reset_game
+    @player.hp = @player.max_hp if @player.respond_to?(:max_hp)
+    show_menu
+    end
+
 
 end
