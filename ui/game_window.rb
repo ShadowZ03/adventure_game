@@ -2,9 +2,10 @@ require 'ruby2d'
 require_relative '../lib/battle'
 
 class GameWindow
-    def initialize(player, monsters)
+    def initialize(player, monsters, story)
         @player = player
         @monsters = monsters
+        @story = story
         @monster_image = nil
         @menu_texts = []
         @state = :menu
@@ -84,6 +85,11 @@ class GameWindow
     def start_battle(monster)
         @state = :battle
         # @menu_texts&.remove
+        
+        chapter = @story.current_chapter
+        Text.new("#{chapter[:title]}", x: 200, y: 20, size: 30, color: 'yellow')
+        Text.new("#{chapter[:text]}", x: 100, y: 60, size: 20, color: 'white')
+        @story.next_chapter
 
         @menu_texts.each(&:remove)
         @selected_monster = monster
@@ -95,8 +101,8 @@ class GameWindow
 
         @intro_texts = Text.new("A wild #{monster.name} appears!", x: 250, y: 50, size: 30, color: 'red')
         rescue => e
-        puts "⚠️ Could not start battle: #{e.class} - #{e.message}"
-        puts e.backtrace
+            puts "⚠️ Could not start battle: #{e.class} - #{e.message}"
+            puts e.backtrace
     end
 
 
@@ -105,12 +111,12 @@ class GameWindow
 
         case event.key
         when "a"
-        result = @current_battle.player_action(:attack)
-        update_battle_message(result)
+            result = @current_battle.player_action(:attack)
+            update_battle_message(result)
         when "r"
-        result = @current_battle.player_action(:run)
-        update_battle_message(result)
-        @state = :menu if result.include?("runs away")
+            result = @current_battle.player_action(:run)
+            update_battle_message(result)
+            @state = :menu if result.include?("runs away")
         end
     end
 
@@ -122,11 +128,11 @@ class GameWindow
         return unless @current_battle
 
         if !@current_battle.monster.alive?
-        @state = :victory
-        show_victory_screen
+            @state = :victory
+            show_victory_screen
         elsif !@player.alive?
-        @state = :defeat
-        show_defeat_screen
+            @state = :defeat
+            show_defeat_screen
         end
     end
 
@@ -140,42 +146,6 @@ class GameWindow
         clear_battle
         Text.new("You won!", x: 350, y: 300, size: 40, color: 'yellow')
     end
-
-    # def show_defeat_screen
-    #     # Text.clear
-    #     clear_battle
-
-    #     @menu_texts&.each(&:remove)
-    #     @menu_texts&.clear
-    #     @battle_texts&.each(&:remove)
-    #     @battle_texts&.clear
-    #     @intro_texts&.remove
-    #     @intro_texts = nil
-
-    #     defeated_text = Text.new("You were defeated...", x: 300, y: 100, size: 40, color: 'red')
-    #     center_text(defeated_text)
-        
-    #     game_over_image = Image.new(File.join(__dir__, '..', '/assets/other/skull.webp'))
-    #     center_image(game_over_image)
-
-    #     try_again_text = Text.new("Try again? (Y)es (N)o", x: 300, y: 500, size: 40, color: 'orange')
-    #     center_text(try_again_text)
-
-
-
-    #     Window.on :key_down do |event|
-    #         case event.key
-    #             when "y"
-    #                 clear_all()
-    #                 game_over_image = nil
-    #                 show_menu
-
-    #             when "n"
-    #                 exit
-    #             end
-    #         end
-
-    # end
 
     def show_defeat_screen
         clear_battle
@@ -217,25 +187,24 @@ class GameWindow
 
     def center_text(text)
         text.x = (Window.width - text.width) / 2
-        # image.y = (Window.height - image.height) / 2
     end
 
     def clear_texts
-    @menu_texts&.each(&:remove)
-    @menu_texts&.clear
-    @battle_text&.remove
-    @intro_texts&.remove
-    @intro_texts = nil
+        @menu_texts&.each(&:remove)
+        @menu_texts&.clear
+        @battle_text&.remove
+        @intro_texts&.remove
+        @intro_texts = nil
     end
 
     def clear_defeat_screen
-    @defeat_elements&.each(&:remove)
-    @defeat_elements&.clear
+        @defeat_elements&.each(&:remove)
+        @defeat_elements&.clear
     end
 
     def reset_game
-    @player.hp = @player.max_hp if @player.respond_to?(:max_hp)
-    show_menu
+        @player.hp = @player.max_hp if @player.respond_to?(:max_hp)
+        show_menu
     end
 
 
