@@ -21,6 +21,14 @@ class ScenesLibrary
             triggers: :battle_goblin,
             choices: { "Continue" => :victory_scene }
         ),
+        orc_encounter: Scene.new(
+            id: :orc_encounter,
+            title: "Ambush!",
+            text: "An Orc lumbers out, ready to fight!",
+            image: "assets/monsters/orc.webp",
+            triggers: :battle_orc,
+            choices: { "Continue" => :victory_scene }
+        ),
         victory_scene: Scene.new(
             id: :victory_scene,
             title: "Victory!",
@@ -42,7 +50,11 @@ class ScenesLibrary
             id: :ancient_ruins,
             title: "Ancient Ruins",
             text: "Crumbled stone walls loom ahead, covered in strange symbols.",
-            image: "assets/scenes/ruins.webp"
+            image: "assets/scenes/ruins.webp",
+            choices: {
+            "Enter the forest" => :orc_encounter,
+            "Set up camp" => :campfire_rest
+            }
         )
         }
     end
